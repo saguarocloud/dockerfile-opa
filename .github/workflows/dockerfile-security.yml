@@ -27,12 +27,21 @@ jobs:
           files_ignore: |
             .github/**
 
-      - name: Run Dockerfile security tests
+      - name: Install conftest
+        run: |
+          CONFTEST_VERSION=0.61.2
+          wget https://github.com/open-policy-agent/conftest/releases/download/v${CONFTEST_VERSION}/conftest_${CONFTEST_VERSION}_Linux_x86_64.tar.gz
+          tar xzf conftest_${CONFTEST_VERSION}_Linux_x86_64.tar.gz
+          sudo mv conftest /usr/local/bin
+
+      - name: Run conftest on changed Dockerfiles
         if: steps.changed-files.outputs.any_changed == 'true'
-        uses: instrumenta/conftest-action@master
-        with:
-          files: ${{ steps.changed-files.outputs.all_changed_files }}
-          policy: dockerfile-policy.rego
+        run: |
+          echo "Running conftest on changed Dockerfiles..."
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "Checking $file"
+            conftest test --policy dockerfile-policy.rego "$file"
+          done
 
       - name: No Dockerfiles changed
         if: steps.changed-files.outputs.any_changed == 'false'
