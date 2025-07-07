@@ -1,6 +1,8 @@
 name: Dockerfile Security Check
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -34,4 +36,3 @@ jobs:
       - name: No Dockerfiles changed
         if: steps.changed-files.outputs.any_changed == 'false'
         run: echo "No Dockerfiles were changed in this commit"
-
